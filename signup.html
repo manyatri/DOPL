@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator Profile Setup — DOPL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c0a;
+    --card: rgba(22, 28, 24, 0.7);
+    --card-border: rgba(255, 255, 255, 0.06);
+    --green: #22c55e;
+    --green-glow: rgba(34, 197, 94, 0.15);
+    --text: #f3f5f3;
+    --muted: #7f8983;
+    --muted-light: #9aa39c;
+    --warning: #f59e0b;
+    --warning-glow: rgba(245, 158, 11, 0.15);
+    --input-bg: #111513;
+    --input-border: rgba(255, 255, 255, 0.08);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.22;
+    filter: blur(0.4px);
+    pointer-events: none;
+  }
+
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* Header Section */
+  .signup-header {
+    width: 100%;
+  }
+
+  .step-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--text);
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    height: 4px;
+    margin-top: 16px;
+  }
+
+  .progress-segment {
+    flex: 1;
+    height: 100%;
+    background: #1c221e;
+    border-radius: 2px;
+  }
+
+  .progress-segment.active {
+    background: var(--green);
+  }
+
+  /* Two Column Split */
+  .signup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.05fr;
+    gap: 48px;
+    align-items: stretch;
+    margin-top: 8px;
+  }
+
+  /* Left Panel */
+  .left-panel {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 60px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 520px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .left-panel::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .left-middle {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .left-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .left-desc {
+    color: var(--muted-light);
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 440px;
+  }
+
+  .left-bottom {
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+    gap: 8px;
+  }
+
+  /* Overlapping Avatar Stack */
+  .avatar-stack {
+    display: flex;
+    align-items: center;
+  }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #141916;
+    background: linear-gradient(135deg, #1b2621, #0f1613);
+    margin-left: -10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .avatar:first-child {
+    margin-left: 0;
+  }
+
+  .avatar:nth-child(2) {
+    background: linear-gradient(135deg, #2c3c34, #1b2621);
+  }
+
+  .avatar:nth-child(3) {
+    background: linear-gradient(135deg, #3d5448, #26382f);
+  }
+
+  .stat-text {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 0.2px;
+  }
+
+  /* Right Panel (Form) */
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .signup-form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 22px;
+  }
+
+  .form-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .form-input-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-size: 14.5px;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.25s ease;
+  }
+
+  .form-input::placeholder {
+    color: #4b5550;
+  }
+
+  .form-input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px var(--green-glow);
+    background: #131916;
+  }
+
+  /* Password strength meter styling */
+  .password-meter-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+  }
+
+  .strength-meter {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    height: 4px;
+    margin-bottom: 8px;
+  }
+
+  .strength-segment {
+    flex: 1;
+    height: 100%;
+    background: #1c221e;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+  }
+
+  .strength-segment.active-weak {
+    background: var(--warning);
+  }
+
+  .strength-segment.active-medium {
+    background: #eab308;
+  }
+
+  .strength-segment.active-strong {
+    background: var(--green);
+  }
+
+  .warning-text {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--warning);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.3s ease;
+  }
+
+  /* Buttons */
+  .btn-submit {
+    background: var(--green);
+    color: #06150c;
+    border: none;
+    border-radius: 8px;
+    padding: 16px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+    font-family: inherit;
+    text-align: center;
+  }
+
+  .btn-submit:hover {
+    background: #4ade80;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+    transform: translateY(-1px);
+  }
+
+  .btn-submit:active {
+    transform: translateY(0);
+  }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #4b5550;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 24px 0;
+    text-transform: lowercase;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--input-border);
+  }
+
+  .divider::before {
+    margin-right: 16px;
+  }
+
+  .divider::after {
+    margin-left: 16px;
+  }
+
+  /* Google Button */
+  .btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+  }
+
+  .btn-google:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .btn-google:active {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  /* Footer Links */
+  .signup-footer-text {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 24px;
+  }
+
+  .signup-footer-text a {
+    color: var(--green);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 4px;
+    transition: color 0.2s ease;
+  }
+
+  .signup-footer-text a:hover {
+    text-decoration: underline;
+    color: #4ade80;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 900px) {
+    .signup-grid {
+      gap: 32px;
+    }
+    .left-title {
+      font-size: 32px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    body {
+      justify-content: flex-start;
+    }
+    .content-wrapper {
+      padding: 32px 18px;
+      gap: 24px;
+    }
+    .signup-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .left-panel {
+      min-height: auto;
+      padding: 40px 32px;
+      gap: 24px;
+    }
+    .left-middle {
+      margin: 12px 0;
+    }
+    .left-title {
+      font-size: 28px;
+    }
+    .left-bottom {
+      margin-top: 16px;
+    }
+    .right-panel {
+      margin-top: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<div class="content-wrapper">
+  <!-- Top Onboarding Header -->
+  <div class="signup-header">
+    <div class="step-label">STEP 1 OF 3</div>
+    <h1 class="page-title">Creator Profile Setup</h1>
+    <div class="progress-bar">
+      <div class="progress-segment active"></div>
+      <div class="progress-segment"></div>
+      <div class="progress-segment"></div>
+    </div>
+  </div>
+
+  <!-- Main Layout Split -->
+  <div class="signup-grid">
+    
+    <!-- Left Column (Social Proof) -->
+    <div class="left-panel">
+      <div class="left-middle">
+        <h2 class="left-title">Defend Your<br>Digital Livelihood.</h2>
+        <p class="left-desc">Join over 5,000+ independent educators, developers, and studios securing their revenue pipelines from automated piracy leakage.</p>
+      </div>
+      
+      <div class="left-bottom">
+        <div class="avatar-stack">
+          <div class="avatar"></div>
+          <div class="avatar"></div>
+          <div class="avatar"></div>
+        </div>
+        <span class="stat-text">Protected ₹4.2Cr in assets this month.</span>
+      </div>
+    </div>
+
+    <!-- Right Column (Form) -->
+    <div class="right-panel">
+      <form class="signup-form" id="signup-form" onsubmit="handleFormSubmit(event)">
+        
+        <!-- Full Name -->
+        <div class="form-group">
+          <label class="form-label" for="full-name">Full Name</label>
+          <div class="form-input-wrapper">
+            <input 
+              type="text" 
+              id="full-name" 
+              class="form-input" 
+              placeholder="e.g., Rohan Sharma" 
+              autocomplete="name"
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Work Email -->
+        <div class="form-group">
+          <label class="form-label" for="work-email">Work Email</label>
+          <div class="form-input-wrapper">
+            <input 
+              type="email" 
+              id="work-email" 
+              class="form-input" 
+              placeholder="you@company.com" 
+              autocomplete="email"
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="form-input-wrapper">
+            <!-- Initialized with 'doplcreator' to match the strength 1 amber state in screenshot -->
+            <input 
+              type="password" 
+              id="password" 
+              class="form-input" 
+              value="doplcreator"
+              autocomplete="new-password"
+              required
+            >
+          </div>
+          
+          <!-- Password Strength Meter -->
+          <div class="password-meter-container">
+            <div class="strength-meter" id="strength-meter">
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+            </div>
+            <div class="warning-text" id="warning-text">
+              Password must include 1 special character and 8+ digits.
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit CTA -->
+        <button type="submit" class="btn-submit">
+          Create Account & Continue
+        </button>
+
+        <!-- Divider -->
+        <div class="divider">or register via</div>
+
+        <!-- Google Workspace OAuth -->
+        <button type="button" class="btn-google" onclick="handleGoogleSignup()">
+          <svg class="google-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.9h6.6c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.56-5.17 3.56-8.56z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.11 0-5.74-2.11-6.68-4.96H1.21v3.15C3.18 21.88 7.31 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.32 14.24A7.16 7.16 0 0 1 5 12c0-.79.13-1.57.32-2.34V6.51H1.21A11.94 11.94 0 0 0 0 12c0 1.92.45 3.74 1.21 5.49l4.11-3.25z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.18 2.12 1.21 5.49l4.11 3.25c.94-2.85 3.57-4.99 6.68-4.99z"/>
+          </svg>
+          Sign Up with Google Workspace
+        </button>
+
+        <!-- Footer link -->
+        <div class="signup-footer-text">
+          Already have a DOPL account?<a href="#" onclick="handleSignInClick(event)">Sign In.</a>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- ThreeJS background script matching landing page -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+  // Background Particles Animation
+  (function(){
+    if(typeof THREE === 'undefined') return;
+
+    var canvas = document.getElementById('bg-canvas');
+    var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 260;
+
+    var group = new THREE.Group();
+    scene.add(group);
+
+    var count = 110;
+    var pts = [];
+    var positions = [];
+    for(var i=0;i<count;i++){
+      var x = (Math.random()-0.5)*620;
+      var y = (Math.random()-0.5)*620;
+      var z = (Math.random()-0.5)*420;
+      pts.push(new THREE.Vector3(x,y,z));
+      positions.push(x,y,z);
+    }
+
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
+    var mat = new THREE.PointsMaterial({color:0x4ade80, size:2.6, transparent:true, opacity:0.85});
+    group.add(new THREE.Points(geo, mat));
+
+    var linePositions = [];
+    var maxDist = 130;
+    for(var a=0;a<pts.length;a++){
+      for(var b=a+1;b<pts.length;b++){
+        if(pts[a].distanceTo(pts[b]) < maxDist){
+          linePositions.push(pts[a].x,pts[a].y,pts[a].z, pts[b].x,pts[b].y,pts[b].z);
+        }
+      }
+    }
+    var lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions,3));
+    var lineMat = new THREE.LineBasicMaterial({color:0x22c55e, transparent:true, opacity:0.25});
+    group.add(new THREE.LineSegments(lineGeo, lineMat));
+
+    function animate(){
+      requestAnimationFrame(animate);
+      group.rotation.y += 0.0007;
+      group.rotation.x += 0.00025;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', function(){
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+    });
+  })();
+
+  // Form Interactivity and Password Strength Checker
+  const passwordInput = document.getElementById('password');
+  const segments = document.querySelectorAll('.strength-segment');
+  const warningText = document.getElementById('warning-text');
+
+  function evaluatePasswordStrength() {
+    const value = passwordInput.value;
+    
+    // Calculate strength points (0 to 4)
+    let score = 0;
+    
+    if (value.length >= 8) score += 1;
+    if (/[0-9]/.test(value)) score += 1;
+    if (/[A-Z]/.test(value) || /[a-z]/.test(value)) score += 1;
+    if (/[^A-Za-z0-9]/.test(value)) score += 1;
+
+    // Additional checks to ensure requirements
+    const hasSpecial = /[^A-Za-z0-9]/.test(value);
+    const hasLength = value.length >= 8;
+
+    // Reset segments
+    segments.forEach(segment => {
+      segment.className = 'strength-segment';
+    });
+
+    if (value.length === 0) {
+      warningText.textContent = "Password must include 1 special character and 8+ digits.";
+      warningText.style.color = "var(--muted)";
+      return;
+    }
+
+    // Determine final strength category
+    if (!hasSpecial || !hasLength) {
+      // If missing critical criteria, cap strength at "weak" (amber color)
+      // Visual matching screenshot: first segment colored amber
+      segments[0].classList.add('active-weak');
+      warningText.textContent = "Password must include 1 special character and 8+ digits.";
+      warningText.style.color = "var(--warning)";
+    } else {
+      // Good or strong
+      if (score === 3) {
+        segments[0].classList.add('active-strong');
+        segments[1].classList.add('active-strong');
+        segments[2].classList.add('active-strong');
+        warningText.textContent = "Strong password.";
+        warningText.style.color = "var(--green)";
+      } else if (score >= 4) {
+        segments[0].classList.add('active-strong');
+        segments[1].classList.add('active-strong');
+        segments[2].classList.add('active-strong');
+        segments[3].classList.add('active-strong');
+        warningText.textContent = "Excellent secure password.";
+        warningText.style.color = "var(--green)";
+      } else {
+        segments[0].classList.add('active-medium');
+        segments[1].classList.add('active-medium');
+        warningText.textContent = "Good password, but could be stronger.";
+        warningText.style.color = "#eab308";
+      }
+    }
+  }
+
+  // Bind key up / input events
+  passwordInput.addEventListener('input', evaluatePasswordStrength);
+  
+  // Trigger on load for the pre-filled mock password
+  window.addEventListener('DOMContentLoaded', evaluatePasswordStrength);
+
+  // CTA Click handlers
+  function handleFormSubmit(event) {
+    event.preventDefault();
+    const name = document.getElementById('full-name').value;
+    const email = document.getElementById('work-email').value;
+    alert(`Success! Creator Profile Setup (Step 1 of 3) complete for: ${name} (${email}). Proceeding to Step 2...`);
+  }
+
+  function handleGoogleSignup() {
+    alert("Redirecting to Google Workspace authentication portal...");
+  }
+
+  function handleSignInClick(event) {
+    event.preventDefault();
+    alert("Navigating to DOPL Login Page...");
+  }
+</script>
+</body>
+</html>

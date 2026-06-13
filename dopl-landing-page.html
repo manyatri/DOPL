@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOPL — Stop Losing Revenue to Piracy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080c0a;
+    --card:rgba(22,28,24,0.7);
+    --card-border:rgba(255,255,255,0.06);
+    --green:#22c55e;
+    --green-soft:#4ade80;
+    --text:#f3f5f3;
+    --muted:#9aa39c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden;}
+
+  #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:0.22;filter:blur(0.4px);pointer-events:none;}
+
+  .content{position:relative;z-index:1;}
+
+  /* header */
+  header{display:flex;justify-content:space-between;align-items:center;padding:24px 60px;}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Poppins',sans-serif;font-weight:700;font-size:20px;letter-spacing:0.5px;}
+  .logo-icon{width:30px;height:30px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#06150c;font-weight:800;font-size:16px;}
+  .nav-right{display:flex;align-items:center;gap:24px;}
+  .signin{color:var(--text);font-size:14px;font-weight:600;text-decoration:none;}
+  .btn-primary{background:var(--green);color:#06150c;padding:10px 20px;border-radius:8px;font-weight:600;font-size:14px;text-decoration:none;}
+
+  /* hero */
+  .hero{text-align:center;max-width:780px;margin:0 auto;padding:64px 24px 32px;}
+  .hero h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:46px;line-height:1.25;}
+  .accent{color:var(--green);}
+  .hero p.lead{color:var(--muted);font-size:17px;line-height:1.7;margin-top:22px;}
+  .hero p.bold-line{font-weight:700;color:var(--text);font-size:16px;margin-top:16px;}
+  .cta{display:inline-block;margin-top:32px;background:var(--green);color:#06150c;padding:16px 34px;border-radius:10px;font-weight:700;font-size:16px;text-decoration:none;}
+
+  /* generic section wrapper */
+  .section{max-width:980px;margin:72px auto 0;padding:0 24px;}
+  .section-heading{text-align:center;max-width:640px;margin:0 auto 36px;}
+  .section-heading h2{font-family:'Poppins',sans-serif;font-weight:700;font-size:30px;}
+  .section-heading p{color:var(--muted);font-size:15px;margin-top:10px;line-height:1.6;}
+
+  /* highlight card */
+  .highlight{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:36px 40px;text-align:center;}
+  .highlight h2{font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;line-height:1.5;}
+  .highlight h2 span{display:block;}
+  .highlight p{color:var(--muted);font-size:15px;line-height:1.7;margin-top:16px;}
+
+  /* generic card grids */
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:28px;}
+  .card h3{font-family:'Poppins',sans-serif;font-weight:700;font-size:17px;margin-bottom:10px;}
+  .card p{color:var(--muted);font-size:14px;line-height:1.7;}
+
+  /* step cards */
+  .step-number{width:34px;height:34px;border-radius:8px;background:rgba(34,197,94,0.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Poppins',sans-serif;margin-bottom:14px;}
+
+  /* two column section (built for / why choose) */
+  .col-card h3.accent{color:var(--green-soft);}
+  .col-card p.muted{color:var(--muted);font-size:14px;margin-bottom:16px;}
+  .feature-list{list-style:none;display:flex;flex-direction:column;gap:14px;}
+  .feature-list li{display:flex;gap:10px;align-items:flex-start;font-weight:600;font-size:14px;}
+  .feature-list .dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:6px;flex-shrink:0;}
+  .feature-list .sub{display:block;color:var(--muted);font-weight:400;font-size:13px;margin-top:2px;}
+  .check-list{list-style:none;display:flex;flex-direction:column;gap:12px;}
+  .check-list li{display:flex;gap:10px;align-items:flex-start;font-size:14px;font-weight:500;}
+  .check-list .tick{color:var(--green);font-weight:700;flex-shrink:0;}
+  .footnote{border-top:1px solid var(--card-border);margin-top:18px;padding-top:14px;color:var(--muted);font-size:13px;}
+
+  /* pricing */
+  .price-card{display:flex;flex-direction:column;padding:32px 28px;position:relative;}
+  .price-card.featured{border:2px solid var(--green);}
+  .price-badge{position:absolute;top:-12px;left:28px;background:rgba(34,197,94,0.15);color:var(--green-soft);font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;}
+  .price-card h3{font-family:'Poppins',sans-serif;font-weight:700;font-size:18px;}
+  .price-card .price-sub{color:var(--muted);font-size:13px;margin-top:6px;}
+  .price-amount{font-family:'Poppins',sans-serif;font-weight:800;font-size:36px;margin:18px 0 4px;}
+  .price-amount span{font-size:14px;color:var(--muted);font-weight:500;}
+  .price-list{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--muted);margin:20px 0;flex-grow:1;}
+  .price-list li{display:flex;gap:8px;align-items:flex-start;}
+  .price-list .tick{color:var(--green);flex-shrink:0;}
+  .price-cta{display:block;text-align:center;margin-top:8px;padding:12px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;}
+  .price-cta.primary{background:var(--green);color:#06150c;}
+  .price-cta.secondary{border:1px solid var(--card-border);color:var(--text);}
+
+  /* testimonials */
+  .testimonial p.quote{color:var(--text);font-size:14px;line-height:1.7;margin-bottom:18px;}
+  .testimonial p.author{color:var(--muted);font-size:13px;font-weight:600;}
+
+  /* faq */
+  .faq{max-width:760px;}
+  .faq-item{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:18px 22px;margin-bottom:12px;}
+  .faq-item summary{font-weight:600;font-size:15px;cursor:pointer;list-style:none;position:relative;padding-right:24px;}
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{content:'+';position:absolute;right:0;top:0;color:var(--green);font-weight:700;font-size:18px;}
+  .faq-item[open] summary::after{content:'\2212';}
+  .faq-item p{color:var(--muted);font-size:14px;line-height:1.7;margin-top:12px;}
+
+  /* bottom banner */
+  .banner{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.18);border-radius:16px;padding:30px 40px;text-align:center;}
+  .banner p.bold{font-family:'Poppins',sans-serif;font-weight:700;font-size:18px;}
+  .banner p.accent{color:var(--green-soft);font-weight:700;font-size:15px;margin-top:8px;}
+
+  /* footer */
+  footer{max-width:980px;margin:72px auto 0;padding:0 24px 40px;border-top:1px solid var(--card-border);}
+  .footer-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:32px;padding:40px 0;}
+  .footer-brand .logo{margin-bottom:10px;}
+  .footer-brand p{color:var(--muted);font-size:13px;max-width:260px;line-height:1.6;}
+  .footer-col h4{font-family:'Poppins',sans-serif;font-size:14px;margin-bottom:14px;}
+  .footer-col a{display:block;color:var(--muted);font-size:13px;text-decoration:none;margin-bottom:10px;}
+  .footer-bottom{text-align:center;color:var(--muted);font-size:12px;padding-top:24px;border-top:1px solid var(--card-border);}
+
+  @media (max-width:900px){
+    .grid-4,.grid-3{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:768px){
+    header{padding:18px 24px;}
+    .nav-right{gap:14px;}
+    .hero{padding:40px 20px 24px;}
+    .hero h1{font-size:32px;}
+    .grid-4,.grid-3,.grid-2{grid-template-columns:1fr;}
+    .highlight,.card,.banner{padding:24px;}
+    .section{margin-top:56px;}
+    .footer-top{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<div class="content">
+  <header>
+    <div class="logo">
+      <span class="logo-icon">D</span>
+      DOPL
+    </div>
+    <div class="nav-right">
+      <a class="signin" href="#">Sign In</a>
+      <a class="btn-primary" href="signup.html">Get Started</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Stop Losing Revenue to Piracy.<br><span class="accent">Take Back Control.</span></h1>
+    <p class="lead">DOPL helps independent course creators detect, disrupt, and reduce large-scale piracy across platforms like Telegram, Discord, and file-hosting sites.</p>
+    <p class="bold-line">Protect your content. Protect your income. Without complex legal battles.</p>
+    <a class="cta" href="signup.html">Get Started in Minutes</a>
+  </section>
+
+  <section class="section">
+    <div class="highlight">
+      <h2>We don't promise to eliminate piracy —<span class="accent">we make it unscalable and unprofitable.</span></h2>
+      <p>DOPL focuses on stopping mass distribution and monetization channels used by pirates, so your content doesn't spread uncontrollably.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <h2>How DOPL Works</h2>
+      <p>A simple, ongoing process that runs quietly in the background while you focus on creating.</p>
+    </div>
+    <div class="grid-4">
+      <div class="card">
+        <div class="step-number">1</div>
+        <h3>Connect your content</h3>
+        <p>Add your course links, files, or brand assets so DOPL knows exactly what to look for.</p>
+      </div>
+      <div class="card">
+        <div class="step-number">2</div>
+        <h3>Continuous monitoring</h3>
+        <p>DOPL scans Telegram channels, Discord servers, and file-hosting sites around the clock.</p>
+      </div>
+      <div class="card">
+        <div class="step-number">3</div>
+        <h3>Automated disruption</h3>
+        <p>Verified leaks trigger takedown requests and access-blocking actions automatically.</p>
+      </div>
+      <div class="card">
+        <div class="step-number">4</div>
+        <h3>Track your impact</h3>
+        <p>Get clear reports showing how piracy reach shrinks over time.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid-2">
+      <div class="card col-card">
+        <h3>Built for Independent Creators</h3>
+        <p class="muted">DOPL is designed for:</p>
+        <ul class="feature-list">
+          <li><span class="dot"></span><span>Course creators selling via their own platforms</span></li>
+          <li><span class="dot"></span><span>High-ticket EdTech platforms &amp; studios<span class="sub">losing direct revenue to encrypted channels</span></span></li>
+          <li><span class="dot"></span><span>Digital product sellers tired of content leaks</span></li>
+        </ul>
+      </div>
+      <div class="card col-card">
+        <h3 class="accent">Why Choose DOPL</h3>
+        <ul class="check-list">
+          <li><span class="tick">✓</span><span>Focused on real piracy channels (Telegram, Discord)</span></li>
+          <li><span class="tick">✓</span><span>Targets large-scale distribution, not just leaks</span></li>
+          <li><span class="tick">✓</span><span>Reduces piracy reach instead of chasing elimination</span></li>
+          <li><span class="tick">✓</span><span>Smart monitoring + action system (not just alerts)</span></li>
+          <li><span class="tick">✓</span><span>Built specifically for independent creators</span></li>
+        </ul>
+        <p class="footnote">DOPL doesn't fight piracy blindly — it strategically limits its impact.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <h2>Everything You Need to Limit Piracy</h2>
+      <p>DOPL combines monitoring, disruption, and reporting into one streamlined system.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <h3>Telegram &amp; Discord monitoring</h3>
+        <p>Track channels and servers known for distributing pirated course content.</p>
+      </div>
+      <div class="card">
+        <h3>File-host scanning</h3>
+        <p>Detect re-uploads across popular file-sharing and cloud storage platforms.</p>
+      </div>
+      <div class="card">
+        <h3>Smart action queue</h3>
+        <p>Review flagged leaks and trigger takedown requests with a single click.</p>
+      </div>
+      <div class="card">
+        <h3>Mass distribution alerts</h3>
+        <p>Get notified when a leak starts spreading at scale, not for every single copy.</p>
+      </div>
+      <div class="card">
+        <h3>Reach reduction reports</h3>
+        <p>See how quickly pirated copies are removed and how reach drops over time.</p>
+      </div>
+      <div class="card">
+        <h3>No legal expertise needed</h3>
+        <p>DOPL handles the technical disruption process so you don't need a lawyer on retainer.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <h2>Simple Pricing for Independent Creators</h2>
+      <p>Start small, scale as your catalog grows.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card price-card">
+        <h3>Starter</h3>
+        <p class="price-sub">For solo creators just getting started</p>
+        <div class="price-amount">$39<span>/month</span></div>
+        <ul class="price-list">
+          <li><span class="tick">✓</span>Monitor up to 5 products</li>
+          <li><span class="tick">✓</span>Telegram &amp; Discord monitoring</li>
+          <li><span class="tick">✓</span>Monthly reach report</li>
+          <li><span class="tick">✓</span>Email alerts</li>
+        </ul>
+        <a class="price-cta secondary" href="signup.html">Get Started</a>
+      </div>
+      <div class="card price-card featured">
+        <span class="price-badge">Most popular</span>
+        <h3>Growth</h3>
+        <p class="price-sub">For creators with an active piracy problem</p>
+        <div class="price-amount">$99<span>/month</span></div>
+        <ul class="price-list">
+          <li><span class="tick">✓</span>Monitor up to 25 products</li>
+          <li><span class="tick">✓</span>Daily scans across all channels</li>
+          <li><span class="tick">✓</span>Automated takedown requests</li>
+          <li><span class="tick">✓</span>Weekly reach reports</li>
+          <li><span class="tick">✓</span>Priority support</li>
+        </ul>
+        <a class="price-cta primary" href="signup.html">Get Started</a>
+      </div>
+      <div class="card price-card">
+        <h3>Studio</h3>
+        <p class="price-sub">For EdTech platforms and studios</p>
+        <div class="price-amount">Custom</div>
+        <ul class="price-list">
+          <li><span class="tick">✓</span>Unlimited products</li>
+          <li><span class="tick">✓</span>Dedicated monitoring setup</li>
+          <li><span class="tick">✓</span>Custom integrations</li>
+          <li><span class="tick">✓</span>Dedicated account manager</li>
+        </ul>
+        <a class="price-cta secondary" href="#">Contact Sales</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <h2>Creators Are Taking Back Control</h2>
+    </div>
+    <div class="grid-3">
+      <div class="card testimonial">
+        <p class="quote">Within a month, the number of active leak channels for my course dropped by more than half. I finally feel like I'm not fighting this alone.</p>
+        <p class="author">Online course creator, Marketing</p>
+      </div>
+      <div class="card testimonial">
+        <p class="quote">I used to spend hours every week sending takedown requests myself. DOPL handles it now, and I just review the weekly summary.</p>
+        <p class="author">Independent instructor, Design</p>
+      </div>
+      <div class="card testimonial">
+        <p class="quote">We rolled DOPL out across our catalog and saw mass-distribution channels shut down faster than our internal team ever could.</p>
+        <p class="author">Operations lead, EdTech studio</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <h2>Frequently Asked Questions</h2>
+    </div>
+    <div class="faq">
+      <details class="faq-item">
+        <summary>Will DOPL completely stop piracy of my content?</summary>
+        <p>No tool can guarantee that. DOPL focuses on disrupting the channels and accounts responsible for mass distribution, so leaks stop spreading at scale and lose their reach.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Which platforms does DOPL monitor?</summary>
+        <p>DOPL currently monitors Telegram channels and groups, Discord servers, and popular file-hosting and cloud storage sites where course content is commonly re-shared.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Do I need any legal knowledge to use DOPL?</summary>
+        <p>No. DOPL handles the technical detection and disruption process, so you don't need to draft takedown notices or understand DMCA procedures yourself.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How long does it take to see results?</summary>
+        <p>Most creators start seeing flagged channels and reduced reach within the first few weeks, depending on how widespread the existing leaks are.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Is DOPL suitable for large catalogs or teams?</summary>
+        <p>Yes. The Studio plan is built for EdTech platforms and teams with large catalogs, including dedicated setup and account support.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="banner">
+      <p class="bold">Piracy won't disappear. But with DOPL, it stops scaling.</p>
+      <p class="accent">If your revenue depends on paid access, DOPL is built for you.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo">
+          <span class="logo-icon">D</span>
+          DOPL
+        </div>
+        <p>DOPL helps independent course creators detect, disrupt, and reduce large-scale piracy across the platforms pirates rely on most.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#">How it works</a>
+        <a href="#">Features</a>
+        <a href="#">Pricing</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+        <a href="#">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Privacy policy</a>
+        <a href="#">Terms of service</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 DOPL. All rights reserved.</div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+  (function(){
+    if(typeof THREE === 'undefined') return;
+
+    var canvas = document.getElementById('bg-canvas');
+    var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 260;
+
+    var group = new THREE.Group();
+    scene.add(group);
+
+    var count = 110;
+    var pts = [];
+    var positions = [];
+    for(var i=0;i<count;i++){
+      var x = (Math.random()-0.5)*620;
+      var y = (Math.random()-0.5)*620;
+      var z = (Math.random()-0.5)*420;
+      pts.push(new THREE.Vector3(x,y,z));
+      positions.push(x,y,z);
+    }
+
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
+    var mat = new THREE.PointsMaterial({color:0x4ade80, size:2.6, transparent:true, opacity:0.85});
+    group.add(new THREE.Points(geo, mat));
+
+    var linePositions = [];
+    var maxDist = 130;
+    for(var a=0;a<pts.length;a++){
+      for(var b=a+1;b<pts.length;b++){
+        if(pts[a].distanceTo(pts[b]) < maxDist){
+          linePositions.push(pts[a].x,pts[a].y,pts[a].z, pts[b].x,pts[b].y,pts[b].z);
+        }
+      }
+    }
+    var lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions,3));
+    var lineMat = new THREE.LineBasicMaterial({color:0x22c55e, transparent:true, opacity:0.25});
+    group.add(new THREE.LineSegments(lineGeo, lineMat));
+
+    function animate(){
+      requestAnimationFrame(animate);
+      group.rotation.y += 0.0007;
+      group.rotation.x += 0.00025;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', function(){
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+    });
+  })();
+</script>
+</body>
+</html>
