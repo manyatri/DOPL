@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-export default function SignupPage({ setView }) {
-  const [fullName, setFullName] = useState('');
-  const [workEmail, setWorkEmail] = useState('');
-  const [password, setPassword] = useState('doplcreator');
+export default function SignupPage({ setView, onContinue, initialData = {} }) {
+  const [fullName, setFullName] = useState(initialData.fullName || '');
+  const [workEmail, setWorkEmail] = useState(initialData.workEmail || '');
+  const [password, setPassword] = useState(initialData.password || 'doplcreator');
 
   // Password strength check
   const getPasswordStrength = (val) => {
@@ -57,7 +57,7 @@ export default function SignupPage({ setView }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Success! Creator Profile Setup (Step 1 of 3) complete for: ${fullName} (${workEmail}). Proceeding to Step 2...`);
+    onContinue({ fullName, workEmail, password });
   };
 
   return (
@@ -209,7 +209,7 @@ export default function SignupPage({ setView }) {
               <a 
                 href="#" 
                 className="text-brand-green no-underline font-semibold ml-1 hover:underline hover:text-brand-green-hover transition"
-                onClick={(e) => { e.preventDefault(); setView('landing'); }}
+                onClick={(e) => { e.preventDefault(); setView('signin'); }}
               >
                 Sign In.
               </a>

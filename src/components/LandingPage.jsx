@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function LandingPage({ setView }) {
   return (
@@ -10,7 +9,7 @@ export default function LandingPage({ setView }) {
           DOPL
         </div>
         <div className="flex items-center gap-6">
-          <a href="#" className="text-brand-text text-sm font-semibold hover:text-brand-green transition" onClick={(e) => { e.preventDefault(); alert("Navigating to DOPL Login Page..."); }}>Sign In</a>
+          <a href="#" className="text-brand-text text-sm font-semibold hover:text-brand-green transition" onClick={(e) => { e.preventDefault(); setView('signin'); }}>Sign In</a>
           <button 
             onClick={() => setView('signup')} 
             className="bg-brand-green text-[#06150c] px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-brand-green-hover hover:scale-[1.02] active:scale-100 transition shadow-sm"
