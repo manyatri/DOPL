@@ -24,3 +24,16 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
+
+button,
+a,
+summary,
+[role="button"],
+select,
+input[type="submit"],
+input[type="button"],
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+

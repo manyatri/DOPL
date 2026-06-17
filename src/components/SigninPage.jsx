@@ -1,21 +1,45 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 export default function SigninPage({ setView, onLoginSuccess }) {
+  const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate API request and login
-    onLoginSuccess({
-      fullName: email.split('@')[0] || 'User',
-      workEmail: email,
-      hostType: 'custom-lms',
-      endpointUrl: 'https://academy.yourdomain.com/api/v1',
-      keywords: 'Advanced Python, Rohan Sharma, Architecture Boot Camp'
-    });
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed, try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      login(data.token, data.user);
+      onLoginSuccess({
+        fullName: data.user.fullName,
+        workEmail: data.user.email,
+      });
+    } catch (err) {
+      console.error(err);
+      setError('Could not reach server. Is the backend running?');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -137,13 +161,18 @@ export default function SigninPage({ setView, onLoginSuccess }) {
               Forgot Password?
             </a>
           </div>
+          
+          {error && (
+            <div className="text-red-500 text-[12.5px] font-medium mb-4">{error}</div>
+          )}
 
           {/* Sign In CTA */}
           <button 
             type="submit" 
-            className="w-full bg-brand-green text-[#06150c] border-none rounded-lg py-3.5 font-bold text-sm cursor-pointer hover:bg-brand-green-hover hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(34,197,94,0.25)] active:scale-100 transition duration-200 text-center"
+            disabled={isLoading}
+            className="w-full bg-brand-green text-[#06150c] border-none rounded-lg py-3.5 font-bold text-sm cursor-pointer hover:bg-brand-green-hover hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(34,197,94,0.25)] active:scale-100 transition duration-200 text-center disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Sign In
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
 
           {/* Divider */}

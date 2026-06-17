@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 export default function TelegramMonitoringPage({ onBack, onFinish, initialData = {} }) {
+  const { token } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [seedSources, setSeedSources] = useState(
     initialData.seedSources !== undefined
       ? initialData.seedSources
@@ -20,15 +24,72 @@ export default function TelegramMonitoringPage({ onBack, onFinish, initialData =
     initialData.scanCloudStorage !== undefined ? initialData.scanCloudStorage : false
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    setError('');
     e.preventDefault();
-    onFinish({
-      seedSources,
-      keywords,
-      scanPublicTelegram,
-      scanPrivateLink,
-      scanCloudStorage,
-    });
+    setIsLoading(true);
+
+    try {
+      // Seed sources: newline se split, empty lines hatao
+      const sourceUrls = seedSources
+        .split('\n')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+
+      // Keywords: comma se split, empty entries hatao
+      const keywordList = keywords
+      .split(',')
+       .map((k) => k.trim())
+      .filter((k) => k.length > 0);
+
+      // Har scan target ko ek-ek karke save karo (hamesha public_telegram)
+      for (const sourceUrl of sourceUrls) {
+        const res = await fetch('http://localhost:5000/api/scan-targets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ sourceUrl, sourceType: 'public_telegram' }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          setError(data.error || 'Failed to save a scan target.');
+          setIsLoading(false);
+          return;
+        }
+      }
+
+        // Har keyword ko ek-ek karke save karo
+      for (const keyword of keywordList) {
+        const res = await fetch('http://localhost:5000/api/keywords', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ keyword }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          setError(data.error || 'Failed to save a keyword.');
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      onFinish({
+        seedSources,
+        keywords,
+        scanPublicTelegram,
+        scanPrivateLink,
+        scanCloudStorage,
+      });
+    } catch (err) {
+      console.error(err);
+      setError('Could not reach server. Is the backend running?');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -133,6 +194,10 @@ export default function TelegramMonitoringPage({ onBack, onFinish, initialData =
               />
             </div>
 
+            {error && (
+              <div className="text-red-500 text-[12.5px] font-medium mb-4">{error}</div>
+            )}
+
             {/* Automated scanning parameters */}
             <div className="flex flex-col mb-8">
               <label className="text-[11px] font-bold tracking-wider text-brand-muted uppercase mb-3.5">
@@ -232,9 +297,10 @@ export default function TelegramMonitoringPage({ onBack, onFinish, initialData =
 
               <button
                 type="submit"
-                className="flex-1 bg-brand-green text-[#06150c] border-none rounded-lg py-3.5 font-bold text-sm cursor-pointer hover:bg-brand-green-hover hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(34,197,94,0.25)] active:scale-100 transition duration-200 text-center animate-pulse"
+                disabled={isLoading}
+                className="flex-1 bg-brand-green text-[#06150c] border-none rounded-lg py-3.5 font-bold text-sm cursor-pointer hover:bg-brand-green-hover hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(34,197,94,0.25)] active:scale-100 transition duration-200 text-center disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Finish Setup & Initialize Scrapers
+                {isLoading ? 'Initializing...' : 'Finish Setup & Initialize Scrapers'}
               </button>
             </div>
 

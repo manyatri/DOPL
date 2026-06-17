@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 export default function SignupPage({ setView, onContinue, initialData = {} }) {
+  const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [fullName, setFullName] = useState(initialData.fullName || '');
   const [workEmail, setWorkEmail] = useState(initialData.workEmail || '');
   const [password, setPassword] = useState(initialData.password || 'doplcreator');
@@ -55,10 +59,34 @@ export default function SignupPage({ setView, onContinue, initialData = {} }) {
 
   const { score, text, colorClass } = getPasswordStrength(password);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setIsLoading(true);
+
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fullName, email: workEmail, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.error || 'Signup failed, try again.');
+      setIsLoading(false);
+      return;
+    }
+
+    login(data.token, data.user);
     onContinue({ fullName, workEmail, password });
-  };
+  } catch (err) {
+    console.error(err);
+    setError('Could not reach server. Is the backend running?');
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="relative z-10 w-full max-w-[1100px] mx-auto px-6 py-10 flex flex-col gap-8">
@@ -178,6 +206,17 @@ export default function SignupPage({ setView, onContinue, initialData = {} }) {
               </div>
             </div>
 
+            {error && (
+              <div className="text-red-500 text-[12.5px] font-medium mb-3">{error}</div>
+            )}
+
+            <button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full bg-brand-green text-[#06150c] border-none rounded-lg py-4 font-bold text-sm cursor-pointer hover:bg-brand-green-hover hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(34,197,94,0.25)] active:scale-100 transition duration-200 mt-2.5 text-center disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Creating Account...' : 'Create Account & Continue'}
+              </button>
             {/* Submit CTA */}
             <button type="submit" className="w-full bg-brand-green text-[#06150c] border-none rounded-lg py-4 font-bold text-sm cursor-pointer hover:bg-brand-green-hover hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(34,197,94,0.25)] active:scale-100 transition duration-200 mt-2.5 text-center">
               Create Account & Continue

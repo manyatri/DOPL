@@ -1,14 +1,46 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 export default function PlatformIntegrationPage({ onBack, onContinue, initialData = {} }) {
+  const { token } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [hostType, setHostType] = useState(initialData.hostType || 'custom-lms');
   const [endpointUrl, setEndpointUrl] = useState(
     initialData.endpointUrl !== undefined ? initialData.endpointUrl : 'https://academy.yourdomain.com/api/v1'
   );
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => 
+    {
+  e.preventDefault();
+  setError('');
+  setIsLoading(true);
+
+    try {
+    const response = await fetch('http://localhost:5000/api/platform/connect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ hostType, endpointUrl }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.error || 'Could not save platform details, try again.');
+      setIsLoading(false);
+      return;
+    }
+
     onContinue({ hostType, endpointUrl });
+    } 
+    catch (err) {
+      console.error(err);
+      setError('Could not reach server. Is the backend running?');
+      setIsLoading(false);
+    }
   };
 
   const options = [
@@ -154,6 +186,10 @@ export default function PlatformIntegrationPage({ onBack, onContinue, initialDat
               />
             </div>
 
+            {error && (
+              <div className="text-red-500 text-[12.5px] font-medium mb-4">{error}</div>
+            )}
+
             {/* Navigation buttons */}
             <div className="flex gap-4 items-center">
               <button
@@ -166,9 +202,10 @@ export default function PlatformIntegrationPage({ onBack, onContinue, initialDat
 
               <button
                 type="submit"
-                className="flex-1 bg-brand-green text-[#06150c] border-none rounded-lg py-3.5 font-bold text-sm cursor-pointer hover:bg-brand-green-hover hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(34,197,94,0.25)] active:scale-100 transition duration-200 text-center"
+                disabled={isLoading}
+                className="flex-1 bg-brand-green text-[#06150c] border-none rounded-lg py-3.5 font-bold text-sm cursor-pointer hover:bg-brand-green-hover hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(34,197,94,0.25)] active:scale-100 transition duration-200 text-center disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Continue to Step 3
+                {isLoading ? 'Saving...' : 'Continue to Step 3'}
               </button>
             </div>
 
