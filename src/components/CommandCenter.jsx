@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 export default function CommandCenter({ formData = {}, onLogOut }) {
   const [currentTab, setCurrentTab] = useState('overview'); // 'overview' | 'content-vault' | 'integration-key'
+  const { token, user } = useAuth();
+  const [keywords, setKeywords] = useState([]);
+  const [scanTargets, setScanTargets] = useState([]);
+  const [scanResults, setScanResults] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const [copiedKey, setCopiedKey] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showLinksModal, setShowLinksModal] = useState(false);
@@ -10,13 +16,13 @@ export default function CommandCenter({ formData = {}, onLogOut }) {
 
   // Generate dynamic client integration key based on workspace details inside useState to avoid impurity during render
   const [apiKey] = useState(() => {
-    const emailBase = btoa(formData.workEmail || 'creator').substring(0, 16).toLowerCase();
+    const emailBase = btoa(user?.email || 'creator').substring(0, 16).toLowerCase();
     const randSuffix = Math.random().toString(36).substr(2, 9);
     return `dopl_live_${emailBase}_${randSuffix}`;
   });
 
   // Parse initials from name
-  const name = formData.fullName || 'Rohan Sharma';
+  const name = user?.fullName || formData.fullName || 'User';
   const getInitials = (nameStr) => {
     const parts = nameStr.split(' ');
     if (parts.length >= 2) {
@@ -25,6 +31,39 @@ export default function CommandCenter({ formData = {}, onLogOut }) {
     return nameStr.substring(0, 2).toUpperCase();
   };
   const initials = getInitials(name);
+
+// ← YAHAN ADD KARO useEffect
+  useEffect(() => {
+    if (!token) return;
+
+    const headers = { 'Authorization': `Bearer ${token}` } ;
+
+    const fetchAll = async () => {
+      try {
+        const [kwRes, stRes, srRes, alRes] = await Promise.all([
+          fetch('http://localhost:5000/api/keywords', { headers }),
+          fetch('http://localhost:5000/api/scan-targets', { headers }),
+          fetch('http://localhost:5000/api/scan-results', { headers }),
+          fetch('http://localhost:5000/api/alerts', { headers }),
+        ]);
+
+        const kwData = await kwRes.json();
+        const stData = await stRes.json();
+        const srData = await srRes.json();
+        const alData = await alRes.json();
+
+        if (kwData.keywords) setKeywords(kwData.keywords);
+        if (stData.targets) setScanTargets(stData.targets);
+        if (srData.scanResults) setScanResults(srData.scanResults);
+        if (alData.alerts) setAlerts(alData.alerts);
+      } 
+      catch (err) {
+        console.error('Failed to fetch dashboard data:', err);
+      }
+    };
+
+    fetchAll();
+  }, [token]);
 
   // Copy API key to clipboard simulation
   const handleCopyKey = () => {
@@ -118,12 +157,22 @@ export default function CommandCenter({ formData = {}, onLogOut }) {
 
             {/* Triage Alerts */}
             <button
-              onClick={() => alert('No triage alerts detected. All pipelines secure.')}
+              onClick={() => {
+                const unreadAlerts = alerts.filter(a => !a.isRead);
+                if (unreadAlerts.length === 0) {
+                  alert('No triage alerts detected. All pipelines secure.');
+                } else {
+                  const summary = unreadAlerts
+                    .map(a => `• ${a.scanResult?.channelName || 'Unknown channel'} — ${a.scanResult?.messagePreview || 'No preview'}`)
+                    .join('\n');
+                  alert(`${unreadAlerts.length} triage alert(s) detected:\n\n${summary}`);
+                }
+              }}
               className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold text-brand-muted hover:text-brand-text hover:bg-[rgba(255,255,255,0.02)] text-left transition-all"
             >
               <span>Triage Alerts</span>
               <span className="bg-[#19211c] text-brand-muted border border-brand-border px-2 py-0.5 rounded-full text-[10px]">
-                {uploadedFiles.length > 0 ? '1' : '0'}
+                {alerts.length}
               </span>
             </button>
 
@@ -225,8 +274,10 @@ export default function CommandCenter({ formData = {}, onLogOut }) {
               <div className="bg-[#0b100d] border border-brand-border rounded-xl p-5 flex flex-col justify-between min-h-[110px]">
                 <span className="text-[10px] font-bold tracking-wider text-brand-muted uppercase">Live Leaks Found</span>
                 <div className="flex flex-col mt-2">
-                  <span className="text-xl font-bold text-brand-text">0 Locations</span>
-                  <span className="text-[11px] text-brand-muted mt-1">Awaiting digital core hash...</span>
+                  <span className="text-xl font-bold text-brand-text">{scanResults.length} Locations</span>
+                  <span className="text-[11px] text-brand-muted mt-1">
+                    {scanResults.length > 0 ? 'Active leaks detected' : 'No leaks detected yet'}
+                  </span>
                 </div>
               </div>
 
@@ -348,7 +399,7 @@ export default function CommandCenter({ formData = {}, onLogOut }) {
                 </div>
 
                 <div className="text-[10px] text-brand-muted mt-4 text-center leading-normal">
-                  OSINT crawling agents deployed onto <strong>{formData.scanPublicTelegram && formData.scanPrivateLink ? '2' : '1'}</strong> Telegram Index networks.
+                  Monitoring <strong>{keywords.length}</strong> keywords across <strong>{scanTargets.length}</strong> public Telegram targets.
                 </div>
               </div>
             </div>

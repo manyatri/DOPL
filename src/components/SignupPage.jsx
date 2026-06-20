@@ -210,6 +210,7 @@ export default function SignupPage({ setView, onContinue, initialData = {} }) {
               <div className="text-red-500 text-[12.5px] font-medium mb-3">{error}</div>
             )}
 
+            
             <button 
                 type="submit" 
                 disabled={isLoading}
@@ -217,10 +218,6 @@ export default function SignupPage({ setView, onContinue, initialData = {} }) {
               >
                 {isLoading ? 'Creating Account...' : 'Create Account & Continue'}
               </button>
-            {/* Submit CTA */}
-            <button type="submit" className="w-full bg-brand-green text-[#06150c] border-none rounded-lg py-4 font-bold text-sm cursor-pointer hover:bg-brand-green-hover hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(34,197,94,0.25)] active:scale-100 transition duration-200 mt-2.5 text-center">
-              Create Account & Continue
-            </button>
 
             {/* Divider */}
             <div className="flex items-center text-center text-[#4b5550] text-[11px] font-semibold my-6 uppercase before:content-[''] before:flex-1 before:border-b before:border-brand-border before:mr-4 after:content-[''] after:flex-1 after:border-b after:border-brand-border after:ml-4">
