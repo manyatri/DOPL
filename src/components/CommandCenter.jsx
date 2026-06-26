@@ -1211,10 +1211,6 @@ const [proofTab, setProofTab] = useState('open');
 
                 return (
                   <div className="mt-4 pt-6 border-t border-brand-border flex flex-col gap-6">
-                    {/* Scroll down hint */}
-                    <div className="flex items-center justify-center gap-2 text-[10px] text-brand-muted">
-                      <span>↓ SCROLL DOWN</span>
-                    </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
