@@ -1196,6 +1196,173 @@ const [proofTab, setProofTab] = useState('open');
                 </div>
               </div>
             </div>
+
+              {/* ── Scroll Section: Takedown Sequence + Infrastructure ── */}
+              {(() => {
+                const resolvedList = allAlerts.filter(a => takenDown[a.id] || (!a.isMock && a.isRead));
+                const firstResolved = resolvedList[0] || null;
+
+                const infraRules = [
+                  { key: 'googleDeindex', label: 'Google Auto De-index', desc: 'Automated DMCA Google Search wipe', group: 'Global Visibility Rules (Layer 2)', default: true },
+                  { key: 'cloudflareShield', label: 'Cloudflare Shield API', desc: 'Server level edge proxy domain termination', group: 'Network Infrastructure (Layer 3)', default: true },
+                  { key: 'hostingBlock', label: 'Hosting Provider Block', desc: 'Direct AWS/DigitalOcean account pings', group: 'Network Infrastructure (Layer 3)', default: true },
+                  { key: 'ispDns', label: 'ISP / DNS Poisoning', desc: 'Block web traffic on Jio/Airtel routers', group: 'Network Infrastructure (Layer 3)', default: false },
+                ];
+
+                return (
+                  <div className="mt-4 pt-6 border-t border-brand-border flex flex-col gap-6">
+                    {/* Scroll down hint */}
+                    <div className="flex items-center justify-center gap-2 text-[10px] text-brand-muted">
+                      <span>↓ SCROLL DOWN</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                      {/* Left — Live Takedown Sequence Log */}
+                      <div className="bg-brand-card border border-brand-border rounded-2xl p-6 flex flex-col gap-5">
+                        <h3 className="text-[13px] font-bold text-brand-text tracking-wide">Live Takedown Sequence Log <span className="text-brand-muted font-normal">(Global View)</span></h3>
+
+                        {firstResolved ? (() => {
+                          const ch = firstResolved.channelName || firstResolved.scanResult?.channelName || 'unknown';
+                          const kw = firstResolved.keyword || firstResolved.scanResult?.keyword || 'Course';
+                          const caseNum = `TRG-${9000 + Math.abs((firstResolved.id?.toString() || '1').split('').reduce((a,c)=>a+c.charCodeAt(0),0)) % 999}`;
+                          return (
+                            <div className="bg-[#070b09] border border-brand-border rounded-xl p-4 flex flex-col gap-1">
+                              <div className="flex justify-between items-center mb-3">
+                                <span className="text-[12px] font-bold text-brand-text">{kw.replace(/\b\w/g,c=>c.toUpperCase())}</span>
+                                <span className="text-[10px] text-brand-muted font-mono">#{caseNum}</span>
+                              </div>
+                              {/* Layer 1 — done */}
+                              <div className="flex items-start gap-3">
+                                <div className="flex flex-col items-center">
+                                  <div className="w-6 h-6 rounded-full bg-brand-green/20 border border-brand-green flex items-center justify-center flex-shrink-0">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                  </div>
+                                  <div className="w-px h-8 bg-brand-green/20 mt-1" />
+                                </div>
+                                <div className="flex flex-col pb-4">
+                                  <span className="text-[12px] font-bold text-brand-green">Layer 1: Social Platform Block</span>
+                                  <span className="text-[10px] text-brand-muted mt-0.5">Telegram URL link deleted for @{ch}</span>
+                                </div>
+                              </div>
+                              {/* Layer 2 — in progress */}
+                              <div className="flex items-start gap-3">
+                                <div className="flex flex-col items-center">
+                                  <div className="w-6 h-6 rounded-full bg-[#38bdf8]/10 border-2 border-[#38bdf8] flex items-center justify-center flex-shrink-0">
+                                    <div className="w-2 h-2 rounded-full bg-[#38bdf8] animate-pulse" />
+                                  </div>
+                                  <div className="w-px h-8 bg-brand-border mt-1" />
+                                </div>
+                                <div className="flex flex-col pb-4">
+                                  <span className="text-[12px] font-bold text-[#38bdf8]">Layer 2: Google Search De-indexing</span>
+                                  <span className="text-[10px] text-[#38bdf8]/70 mt-0.5">DMCA API request pending in Google core queue</span>
+                                </div>
+                              </div>
+                              {/* Layer 3 — standby */}
+                              <div className="flex items-start gap-3">
+                                <div className="w-6 h-6 rounded-full bg-[#1a1f1c] border border-brand-border flex items-center justify-center flex-shrink-0">
+                                  <div className="w-2 h-2 rounded-full bg-brand-muted" />
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-[12px] font-bold text-brand-muted">Layer 3: Infrastructure Domain Block</span>
+                                  <span className="text-[10px] text-brand-muted/60 mt-0.5">Cloudflare API integration standing by</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })() : (
+                          <p className="text-[11px] text-brand-muted text-center py-8">No takedowns filed yet. Authorize a takedown from Triage Alerts to see sequence here.</p>
+                        )}
+
+                        {/* Auto-Remediation History */}
+                        <div className="flex flex-col gap-3 mt-2">
+                          <span className="text-[10px] font-bold tracking-wider text-brand-muted uppercase">Auto-Remediation History</span>
+                          {resolvedList.length === 0 ? (
+                            <p className="text-[11px] text-brand-muted">No resolved cases yet.</p>
+                          ) : (
+                            resolvedList.map((a, i) => {
+                              const kw = a.keyword || a.scanResult?.keyword || 'Course';
+                              const layer = i % 2 === 0 ? 'Layer 1 & Layer 2 actions' : 'Layer 3 (Cloudflare Server Shutdown)';
+                              const color = i % 2 === 0 ? 'bg-brand-green' : 'bg-[#f87171]';
+                              return (
+                                <div key={a.id} className="flex items-start gap-3 bg-[#070b09] border border-brand-border rounded-lg p-3">
+                                  <div className={`w-1 self-stretch rounded-full flex-shrink-0 ${color}`} />
+                                  <div className="flex flex-col">
+                                    <span className="text-[12px] font-bold text-brand-text">{kw.replace(/\b\w/g,c=>c.toUpperCase()).replace(/\s+/g,'_')}</span>
+                                    <span className="text-[10px] text-brand-muted mt-0.5">Protected via {layer}</span>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right — Infrastructure Command Center */}
+                      <div className="flex flex-col gap-4">
+                        <h3 className="text-[13px] font-bold text-brand-text tracking-wide">Infrastructure Command Center</h3>
+
+                        {/* Group: Global Visibility Rules */}
+                        <div className="bg-brand-card border border-brand-border rounded-2xl p-5 flex flex-col gap-4">
+                          <span className="text-[10px] font-bold tracking-wider text-brand-muted uppercase">Global Visibility Rules (Layer 2)</span>
+                          {infraRules.filter(r => r.group === 'Global Visibility Rules (Layer 2)').map(rule => (
+                            <div key={rule.key} className="flex items-center justify-between gap-4">
+                              <div>
+                                <p className="text-[13px] font-bold text-brand-text">{rule.label}</p>
+                                <p className="text-[10px] text-brand-muted mt-0.5">{rule.desc}</p>
+                              </div>
+                              <button
+                                onClick={() => setAutoRules(prev => ({ ...prev, [rule.key]: !prev[rule.key] }))}
+                                className={`flex-shrink-0 w-11 h-6 rounded-full border transition-all relative cursor-pointer ${
+                                  (autoRules[rule.key] ?? rule.default) ? 'bg-brand-green/20 border-brand-green/40' : 'bg-[#0a0f0d] border-brand-border'
+                                }`}
+                              >
+                                <span className={`absolute top-0.5 w-5 h-5 rounded-full transition-all ${
+                                  (autoRules[rule.key] ?? rule.default) ? 'left-[22px] bg-brand-green shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'left-0.5 bg-[#3a443e]'
+                                }`} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Group: Network Infrastructure */}
+                        <div className="bg-brand-card border border-brand-border rounded-2xl p-5 flex flex-col gap-4">
+                          <span className="text-[10px] font-bold tracking-wider text-brand-muted uppercase">Network Infrastructure (Layer 3)</span>
+                          {infraRules.filter(r => r.group === 'Network Infrastructure (Layer 3)').map(rule => (
+                            <div key={rule.key} className="flex items-center justify-between gap-4">
+                              <div>
+                                <p className="text-[13px] font-bold text-brand-text">{rule.label}</p>
+                                <p className="text-[10px] text-brand-muted mt-0.5">{rule.desc}</p>
+                              </div>
+                              <button
+                                onClick={() => setAutoRules(prev => ({ ...prev, [rule.key]: !prev[rule.key] }))}
+                                className={`flex-shrink-0 w-11 h-6 rounded-full border transition-all relative cursor-pointer ${
+                                  (autoRules[rule.key] ?? rule.default) ? 'bg-brand-green/20 border-brand-green/40' : 'bg-[#0a0f0d] border-brand-border'
+                                }`}
+                              >
+                                <span className={`absolute top-0.5 w-5 h-5 rounded-full transition-all ${
+                                  (autoRules[rule.key] ?? rule.default) ? 'left-[22px] bg-brand-green shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'left-0.5 bg-[#3a443e]'
+                                }`} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* System Legal Warning */}
+                        <div className="bg-[#f59e0b]/5 border border-[#f59e0b]/25 rounded-xl p-4 flex items-start gap-3">
+                          <span className="text-[#f59e0b] text-[13px] flex-shrink-0">⚠</span>
+                          <div>
+                            <p className="text-[11px] font-bold text-[#f59e0b] uppercase tracking-wider">System Legal Warning</p>
+                            <p className="text-[10px] text-brand-muted mt-1 leading-relaxed">Layer 3 actions cannot be reversed automatically. Consult legal counsel before enabling ISP/DNS blocking.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                );
+              })()}
+
           </div>
           );
         })()}
