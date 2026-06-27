@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// USERS - Every creator who signs up
+model User {
+  id           String   @id @default(uuid())
+  fullName     String
+  email        String   @unique
+  passwordHash String
+  plan         String   @default("free")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  platformIntegration PlatformIntegration?
+  keywords             MonitoredKeyword[]
+  scanResults          ScanResult[]
+  takedownRequests     TakedownRequest[]
+  alerts               Alert[]
+
+  @@map("users")
+}
+
+// PLATFORM INTEGRATION - Where creator hosts their content
+model PlatformIntegration {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  hostType    String
+  endpointUrl String
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("platform_integrations")
+}
+
+// MONITORED KEYWORDS - What to search for
+model MonitoredKeyword {
+  id        String   @id @default(uuid())
+  userId    String
+  keyword   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scanResults ScanResult[]
+
+  @@map("monitored_keywords")
+}
+
+// SCAN TARGETS - Public Telegram channels/groups to monitor
+model ScanTarget {
+  id         String   @id @default(uuid())
+  userId     String
+  sourceUrl  String
+  sourceType String   @default("public_telegram")
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@map("scan_targets")
+}
+
+// SCAN RESULTS - What was found during scans
+model ScanResult {
+  id              String   @id @default(uuid())
+  userId          String
+  keywordId       String
+  foundUrl        String
+  channelName     String
+  messagePreview  String?
+  detectedAt      DateTime @default(now())
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keyword          MonitoredKeyword  @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  takedownRequest  TakedownRequest?
+  alert            Alert?
+
+  @@map("scan_results")
+}
+
+// TAKEDOWN REQUESTS - Action taken on a violation
+model TakedownRequest {
+  id            String   @id @default(uuid())
+  scanResultId  String   @unique
+  userId        String
+  status        String   @default("pending")
+  notes         String?
+  createdAt     DateTime @default(now())
+  resolvedAt    DateTime?
+
+  scanResult ScanResult @relation(fields: [scanResultId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("takedown_requests")
+}
+
+// ALERTS - Notifications shown to the user
+model Alert {
+  id           String   @id @default(uuid())
+  userId       String
+  scanResultId String   @unique
+  isRead       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scanResult ScanResult @relation(fields: [scanResultId], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
+}
