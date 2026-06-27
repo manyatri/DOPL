@@ -67,10 +67,10 @@ const [proofTab, setProofTab] = useState('open');
     const fetchAll = async () => {
       try {
         const [kwRes, stRes, srRes, alRes] = await Promise.all([
-          fetch('http://localhost:5000/api/keywords', { headers }),
-          fetch('http://localhost:5000/api/scan-targets', { headers }),
-          fetch('http://localhost:5000/api/scan-results', { headers }),
-          fetch('http://localhost:5000/api/alerts', { headers }),
+          fetch('https://dopl-backend.onrender.com/api/keywords', { headers }),
+          fetch('https://dopl-backend.onrender.com/api/scan-targets', { headers }),
+          fetch('https://dopl-backend.onrender.com/api/scan-results', { headers }),
+          fetch('https://dopl-backend.onrender.com/api/alerts', { headers }),
         ]);
         const kwData = await kwRes.json();
         const stData = await stRes.json();
@@ -180,13 +180,13 @@ const [proofTab, setProofTab] = useState('open');
         'Content-Type': 'application/json',
       };
       // Create takedown record
-      await fetch('http://localhost:5000/api/takedowns', {
+      await fetch('https://dopl-backend.onrender.com/api/takedowns', {
         method: 'POST',
         headers,
         body: JSON.stringify({ scanResultId: alertItem.scanResultId }),
       });
       // Mark alert as read
-      await fetch(`http://localhost:5000/api/alerts/${alertItem.id}`, {
+      await fetch(`https://dopl-backend.onrender.com/api/alerts/${alertItem.id}`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ isRead: true }),
@@ -217,15 +217,15 @@ const [proofTab, setProofTab] = useState('open');
   const handleRunScan = async () => {
     setIsScanning(true);
     try {
-      await fetch('http://localhost:5000/api/scan/run-now', {
+      await fetch('https://dopl-backend.onrender.com/api/scan/run-now', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
       setTimeout(async () => {
         const headers = { Authorization: `Bearer ${token}` };
         const [srRes, alRes] = await Promise.all([
-          fetch('http://localhost:5000/api/scan-results', { headers }),
-          fetch('http://localhost:5000/api/alerts', { headers }),
+          fetch('https://dopl-backend.onrender.com/api/scan-results', { headers }),
+          fetch('https://dopl-backend.onrender.com/api/alerts', { headers }),
         ]);
         const srData = await srRes.json();
         const alData = await alRes.json();

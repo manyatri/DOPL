@@ -44,7 +44,7 @@ export default function TelegramMonitoringPage({ onBack, onFinish, initialData =
 
       // Har scan target ko ek-ek karke save karo (hamesha public_telegram)
       for (const sourceUrl of sourceUrls) {
-        const res = await fetch('http://localhost:5000/api/scan-targets', {
+        const res = await fetch('https://dopl-backend.onrender.com/api/scan-targets', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export default function TelegramMonitoringPage({ onBack, onFinish, initialData =
 
         // Har keyword ko ek-ek karke save karo
       for (const keyword of keywordList) {
-        const res = await fetch('http://localhost:5000/api/keywords', {
+        const res = await fetch('https://dopl-backend.onrender.com/api/keywords', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
